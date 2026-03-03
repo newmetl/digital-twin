@@ -1,9 +1,9 @@
 'use client';
 
 const SUGGESTED_QUESTIONS = [
-  'Was machst du als KI-gestützter Product Owner?',
-  'Wie setzt du KI in deiner täglichen Arbeit ein?',
-  'Was ist deine Vision für die Zukunft der Produktentwicklung?',
+  'Was unterscheidet dich von einem klassischen Product Owner?',
+  'Wie verändert KI die Produktentwicklung konkret?',
+  'Wie hast du deine Website in 4 Stunden gebaut?',
   'Wie können wir zusammenarbeiten?',
 ];
 

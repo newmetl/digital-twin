@@ -1,29 +1,70 @@
 'use client';
 
+import Image from 'next/image';
+import { useState } from 'react';
+
 interface HeroSectionProps {
   onCtaClick: () => void;
 }
 
 export default function HeroSection({ onCtaClick }: HeroSectionProps) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <section className="flex flex-col items-center text-center py-16 px-4">
       {/* Avatar */}
       <div className="relative mb-6">
-        <div className="w-32 h-32 rounded-full bg-gradient-to-br from-cyan-400 to-violet-600 p-0.5 animate-pulse-glow">
-          <div className="w-full h-full rounded-full bg-bg-surface flex items-center justify-center">
-            <span className="text-4xl font-bold text-accent-cyan font-mono tracking-wider">
-              WG
-            </span>
+        {/* Äußerer Glow-Ring */}
+        <div
+          className="w-44 h-44 rounded-full p-0.5 animate-pulse-glow"
+          style={{
+            background: 'linear-gradient(135deg, #00d4ff, #7b2fff)',
+          }}
+        >
+          {/* Innerer Kreis mit Foto */}
+          <div className="w-full h-full rounded-full overflow-hidden bg-bg-surface">
+            {!imgError ? (
+              <Image
+                src="/avatar.jpg"
+                alt="Wojtek Gorecki"
+                width={176}
+                height={176}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: 'center center' }}
+                priority
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              /* Fallback: Initialen */
+              <div className="w-full h-full flex items-center justify-center">
+                <span
+                  className="text-4xl font-bold"
+                  style={{
+                    color: '#00d4ff',
+                    fontFamily: 'var(--font-space-mono, monospace)',
+                  }}
+                >
+                  WG
+                </span>
+              </div>
+            )}
           </div>
         </div>
+
         {/* Online-Indikator */}
-        <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
-          <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 block animate-online-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+        <div className="absolute bottom-2 right-2">
+          <span
+            className="w-4 h-4 rounded-full bg-emerald-400 block animate-online-pulse"
+            style={{ boxShadow: '0 0 8px rgba(52,211,153,0.9), 0 0 16px rgba(52,211,153,0.4)' }}
+          />
         </div>
       </div>
 
       {/* Status */}
-      <div className="flex items-center gap-2 mb-4 text-emerald-400 text-sm font-mono">
+      <div
+        className="flex items-center gap-2 mb-4 text-sm"
+        style={{ color: '#34d399', fontFamily: 'var(--font-space-mono, monospace)' }}
+      >
         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-online-pulse" />
         <span>Online – Bereit für deine Fragen</span>
       </div>
@@ -32,15 +73,21 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
       <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 tracking-tight">
         Wojtek Gorecki
       </h1>
-      <p className="text-accent-cyan text-lg font-mono mb-6 tracking-widest uppercase text-sm">
+      <p
+        className="mb-6 tracking-widest uppercase text-sm"
+        style={{ color: '#00d4ff', fontFamily: 'var(--font-space-mono, monospace)' }}
+      >
         KI-gestützter Product Owner
       </p>
 
-      {/* Beschreibung / CTA-Text */}
-      <p className="text-text-secondary max-w-lg text-base md:text-lg leading-relaxed mb-8">
+      {/* Beschreibung */}
+      <p
+        className="max-w-lg text-base md:text-lg leading-relaxed mb-8"
+        style={{ color: '#a0a0b0' }}
+      >
         Ich stehe dir digital zur Verfügung – stelle mir deine Fragen zu{' '}
-        <span className="text-accent-cyan">KI</span>,{' '}
-        <span className="text-accent-violet">Product Ownership</span> und der Zukunft der
+        <span style={{ color: '#00d4ff' }}>KI</span>,{' '}
+        <span style={{ color: '#7b2fff' }}>Product Ownership</span> und der Zukunft der
         Produktentwicklung. Mein digitaler Zwilling antwortet mit meiner Stimme.
       </p>
 
@@ -48,14 +95,27 @@ export default function HeroSection({ onCtaClick }: HeroSectionProps) {
       <button
         onClick={onCtaClick}
         className="group relative px-8 py-4 rounded-lg font-semibold text-base transition-all duration-300
-          bg-gradient-to-r from-cyan-500/10 to-violet-500/10
-          border border-accent-cyan/40 text-accent-cyan
-          hover:border-accent-cyan hover:bg-accent-cyan/10
-          hover:shadow-[0_0_30px_rgba(0,212,255,0.2)]
-          focus:outline-none focus:ring-2 focus:ring-accent-cyan/50"
+          focus:outline-none"
+        style={{
+          background: 'linear-gradient(135deg, rgba(0,212,255,0.08), rgba(123,47,255,0.08))',
+          border: '1px solid rgba(0,212,255,0.4)',
+          color: '#00d4ff',
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.borderColor = '#00d4ff';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow =
+            '0 0 30px rgba(0,212,255,0.2)';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(0,212,255,0.4)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
+        }}
       >
         <span className="flex items-center gap-3">
-          <span className="w-2 h-2 rounded-full bg-accent-cyan group-hover:animate-ping" />
+          <span
+            className="w-2 h-2 rounded-full"
+            style={{ backgroundColor: '#00d4ff' }}
+          />
           Gespräch starten
           <svg
             className="w-4 h-4 transition-transform group-hover:translate-x-1"
