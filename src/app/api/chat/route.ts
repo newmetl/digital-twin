@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { anthropic, CLAUDE_MODEL, MAX_TOKENS } from '@/lib/anthropic';
 import { SYSTEM_PROMPT } from '@/lib/systemPrompt';
+import { sendTelegramNotification } from '@/lib/telegram';
 import { ChatRequest } from '@/types/chat';
 
 export async function POST(request: NextRequest) {
@@ -24,6 +25,14 @@ export async function POST(request: NextRequest) {
 
     const textContent = response.content.find((c) => c.type === 'text');
     const text = textContent?.type === 'text' ? textContent.text : '';
+
+    // Letzte Besuchernachricht für Telegram ermitteln
+    const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user');
+
+    // Telegram-Benachrichtigung fire-and-forget (blockiert den Chat nicht)
+    if (lastUserMessage) {
+      sendTelegramNotification(lastUserMessage.content, text).catch(() => {});
+    }
 
     return NextResponse.json({ text });
   } catch (error) {

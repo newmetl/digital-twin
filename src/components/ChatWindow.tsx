@@ -5,6 +5,8 @@ import { Message } from '@/types/chat';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 
+const CALENDLY_URL = 'https://calendly.com/wojtek-gorecki/60-minuten-gesprach';
+
 const INITIAL_MESSAGE: Message = {
   id: 'initial',
   role: 'assistant',
@@ -28,6 +30,7 @@ export default function ChatWindow({
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasReplied, setHasReplied] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -82,6 +85,7 @@ export default function ChatWindow({
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
+        setHasReplied(true);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Es ist ein Fehler aufgetreten.'
@@ -93,7 +97,6 @@ export default function ChatWindow({
     [isLoading, messages]
   );
 
-  // Externes Senden via SuggestedQuestions
   useEffect(() => {
     if (pendingQuestion) {
       sendMessage(pendingQuestion);
@@ -109,33 +112,53 @@ export default function ChatWindow({
   };
 
   return (
-    <div
-      ref={chatRef}
-      className="max-w-3xl mx-auto px-4 pb-12"
-    >
+    <div ref={chatRef} className="max-w-3xl mx-auto px-4 pb-8">
       <div
-        className="rounded-2xl border border-border-primary overflow-hidden
-          bg-bg-surface/80 backdrop-blur-xl
-          shadow-[0_0_50px_rgba(0,212,255,0.05)]"
+        className="rounded-2xl border overflow-hidden backdrop-blur-xl"
+        style={{
+          borderColor: '#1e1e30',
+          background: 'rgba(18,18,26,0.8)',
+          boxShadow: '0 0 50px rgba(0,212,255,0.05)',
+        }}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-border-primary bg-bg-surface">
+        <div
+          className="flex items-center gap-3 px-5 py-4 border-b"
+          style={{ borderColor: '#1e1e30', background: '#12121a' }}
+        >
           <div className="flex gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-red-500/60" />
-            <span className="w-3 h-3 rounded-full bg-yellow-500/60" />
-            <span className="w-3 h-3 rounded-full bg-green-500/60" />
+            <span className="w-3 h-3 rounded-full" style={{ background: 'rgba(239,68,68,0.6)' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: 'rgba(234,179,8,0.6)' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: 'rgba(34,197,94,0.6)' }} />
           </div>
-          <span className="text-text-muted text-xs font-mono ml-2">
+          <span className="text-xs ml-2" style={{ color: '#5a5a7a', fontFamily: 'monospace' }}>
             wojtek.gorecki — digitaler_zwilling
           </span>
-          <div className="ml-auto flex items-center gap-1.5 text-emerald-400 text-xs font-mono">
+          <div className="ml-auto flex items-center gap-1.5 text-xs" style={{ color: '#34d399', fontFamily: 'monospace' }}>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-online-pulse" />
             live
           </div>
         </div>
 
+        {/* Transparenz-Banner */}
+        <div
+          className="flex items-center gap-2 px-5 py-2 border-b text-xs"
+          style={{
+            borderColor: '#1e1e30',
+            background: 'rgba(0,212,255,0.03)',
+            color: '#5a5a7a',
+            fontFamily: 'monospace',
+          }}
+        >
+          <svg className="w-3 h-3 flex-shrink-0" style={{ color: '#00d4ff', opacity: 0.5 }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>Wojtek liest alle Gespräche mit – so kann er direkt dort anknüpfen, wenn ihr euch persönlich austauscht.</span>
+        </div>
+
         {/* Messages */}
-        <div className="h-96 overflow-y-auto px-5 py-5 space-y-1 scrollbar-thin">
+        <div className="h-96 overflow-y-auto px-5 py-5 space-y-1">
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
@@ -149,7 +172,7 @@ export default function ChatWindow({
         </div>
 
         {/* Input */}
-        <div className="border-t border-border-primary px-4 py-4 bg-bg-surface">
+        <div className="border-t px-4 py-4" style={{ borderColor: '#1e1e30', background: '#12121a' }}>
           <div className="flex gap-3 items-end">
             <textarea
               ref={inputRef}
@@ -159,12 +182,25 @@ export default function ChatWindow({
               placeholder="Schreib eine Nachricht... (Enter zum Senden)"
               disabled={isLoading}
               rows={1}
-              className="flex-1 resize-none bg-bg-primary border border-border-primary rounded-xl px-4 py-3
-                text-white text-sm placeholder-text-muted
-                focus:outline-none focus:border-accent-cyan/50 focus:shadow-[0_0_15px_rgba(0,212,255,0.1)]
+              className="flex-1 resize-none rounded-xl px-4 py-3 text-white text-sm
                 disabled:opacity-50 disabled:cursor-not-allowed
-                transition-all duration-200 max-h-32 overflow-y-auto"
-              style={{ minHeight: '44px' }}
+                transition-all duration-200 overflow-y-auto"
+              style={{
+                minHeight: '44px',
+                maxHeight: '128px',
+                background: '#0a0a0f',
+                border: '1px solid #1e1e30',
+                outline: 'none',
+                color: '#ffffff',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(0,212,255,0.5)';
+                e.currentTarget.style.boxShadow = '0 0 15px rgba(0,212,255,0.1)';
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = '#1e1e30';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
               onInput={(e) => {
                 const target = e.target as HTMLTextAreaElement;
                 target.style.height = 'auto';
@@ -174,15 +210,28 @@ export default function ChatWindow({
             <button
               onClick={() => sendMessage(input)}
               disabled={isLoading || !input.trim()}
-              className="flex-shrink-0 w-11 h-11 rounded-xl bg-accent-cyan/10 border border-accent-cyan/30
-                flex items-center justify-center text-accent-cyan
-                hover:bg-accent-cyan/20 hover:border-accent-cyan
-                hover:shadow-[0_0_15px_rgba(0,212,255,0.2)]
-                disabled:opacity-30 disabled:cursor-not-allowed
-                transition-all duration-200"
+              className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center
+                disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+              style={{
+                background: 'rgba(0,212,255,0.1)',
+                border: '1px solid rgba(0,212,255,0.3)',
+                color: '#00d4ff',
+              }}
+              onMouseEnter={(e) => {
+                if (!e.currentTarget.disabled) {
+                  e.currentTarget.style.background = 'rgba(0,212,255,0.2)';
+                  e.currentTarget.style.borderColor = '#00d4ff';
+                  e.currentTarget.style.boxShadow = '0 0 15px rgba(0,212,255,0.2)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(0,212,255,0.1)';
+                e.currentTarget.style.borderColor = 'rgba(0,212,255,0.3)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
               {isLoading ? (
-                <span className="w-4 h-4 border border-accent-cyan/40 border-t-accent-cyan rounded-full animate-spin" />
+                <span className="w-4 h-4 border border-accent-cyan/40 border-t-accent-cyan rounded-full animate-spin" style={{ borderTopColor: '#00d4ff', borderColor: 'rgba(0,212,255,0.3)' }} />
               ) : (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -190,10 +239,56 @@ export default function ChatWindow({
               )}
             </button>
           </div>
-          <p className="text-text-muted text-xs mt-2 text-center font-mono">
+          <p className="text-xs mt-2 text-center" style={{ color: '#5a5a7a', fontFamily: 'monospace' }}>
             Enter senden · Shift+Enter neue Zeile
           </p>
         </div>
+      </div>
+
+      {/* Calendly CTA – erscheint nach der ersten Antwort */}
+      <div
+        className="mt-4 rounded-xl border px-5 py-4 flex items-center justify-between gap-4 transition-all duration-500"
+        style={{
+          borderColor: 'rgba(123,47,255,0.3)',
+          background: 'rgba(123,47,255,0.05)',
+          opacity: hasReplied ? 1 : 0.4,
+        }}
+      >
+        <div>
+          <p className="text-white text-sm font-semibold mb-0.5">
+            Lieber persönlich reden?
+          </p>
+          <p className="text-xs" style={{ color: '#a0a0b0' }}>
+            Buch dir 60 Minuten mit Wojtek – direkt und unkompliziert.
+          </p>
+        </div>
+        <a
+          href={CALENDLY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+          style={{
+            background: 'rgba(123,47,255,0.15)',
+            border: '1px solid rgba(123,47,255,0.4)',
+            color: '#a78bfa',
+            textDecoration: 'none',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(123,47,255,0.25)';
+            e.currentTarget.style.borderColor = '#7b2fff';
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(123,47,255,0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(123,47,255,0.15)';
+            e.currentTarget.style.borderColor = 'rgba(123,47,255,0.4)';
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Termin buchen
+        </a>
       </div>
     </div>
   );
