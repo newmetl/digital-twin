@@ -32,7 +32,7 @@ export default function ChatWindow({ chatRef }: ChatWindowProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(true);
-  const [hasReplied, setHasReplied] = useState(false);
+  const [replyCount, setReplyCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -88,7 +88,7 @@ export default function ChatWindow({ chatRef }: ChatWindowProps) {
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
-        setHasReplied(true);
+        setReplyCount((prev) => prev + 1);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : 'Es ist ein Fehler aufgetreten.'
@@ -166,7 +166,7 @@ export default function ChatWindow({ chatRef }: ChatWindowProps) {
                 className="text-xs mb-3 pl-11"
                 style={{ color: '#5a5a7a', fontFamily: 'monospace' }}
               >
-                Oder wähle eine Frage:
+                Wähle eine Schnellfrage
               </p>
               <div className="flex flex-col gap-2 pl-11">
                 {SUGGESTED_QUESTIONS.map((question) => (
@@ -195,6 +195,12 @@ export default function ChatWindow({ chatRef }: ChatWindowProps) {
                   </button>
                 ))}
               </div>
+              <p
+                className="text-xs mt-3 pl-11"
+                style={{ color: '#5a5a7a', fontFamily: 'monospace' }}
+              >
+                Oder schreibe eine Nachricht
+              </p>
             </div>
           )}
 
@@ -289,7 +295,7 @@ export default function ChatWindow({ chatRef }: ChatWindowProps) {
         style={{
           borderColor: 'rgba(123,47,255,0.3)',
           background: 'rgba(123,47,255,0.05)',
-          opacity: hasReplied ? 1 : 0.4,
+          opacity: replyCount >= 3 ? 1 : 0.4,
         }}
       >
         <div>
