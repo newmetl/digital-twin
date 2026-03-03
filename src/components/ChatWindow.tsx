@@ -7,6 +7,13 @@ import TypingIndicator from './TypingIndicator';
 
 const CALENDLY_URL = 'https://calendly.com/wojtek-gorecki/60-minuten-gesprach';
 
+const SUGGESTED_QUESTIONS = [
+  'Was unterscheidet dich von einem klassischen Product Owner?',
+  'Wie verändert KI die Produktentwicklung konkret?',
+  'Wie hast du deine Website in 4 Stunden gebaut?',
+  'Wie können wir zusammenarbeiten?',
+];
+
 const INITIAL_MESSAGE: Message = {
   id: 'initial',
   role: 'assistant',
@@ -16,20 +23,15 @@ const INITIAL_MESSAGE: Message = {
 };
 
 interface ChatWindowProps {
-  pendingQuestion?: string | null;
-  onQuestionConsumed?: () => void;
   chatRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-export default function ChatWindow({
-  pendingQuestion,
-  onQuestionConsumed,
-  chatRef,
-}: ChatWindowProps) {
+export default function ChatWindow({ chatRef }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const [hasReplied, setHasReplied] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -48,6 +50,7 @@ export default function ChatWindow({
       if (!trimmed || isLoading) return;
 
       setError(null);
+      setShowSuggestions(false);
 
       const userMessage: Message = {
         id: `user-${Date.now()}`,
@@ -96,13 +99,6 @@ export default function ChatWindow({
     },
     [isLoading, messages]
   );
-
-  useEffect(() => {
-    if (pendingQuestion) {
-      sendMessage(pendingQuestion);
-      onQuestionConsumed?.();
-    }
-  }, [pendingQuestion, sendMessage, onQuestionConsumed]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -162,6 +158,46 @@ export default function ChatWindow({
           {messages.map((message) => (
             <MessageBubble key={message.id} message={message} />
           ))}
+
+          {/* Schnellfragen – inline im Chat, vor der ersten Nachricht */}
+          {showSuggestions && (
+            <div className="pt-2 pb-1">
+              <p
+                className="text-xs mb-3 pl-11"
+                style={{ color: '#5a5a7a', fontFamily: 'monospace' }}
+              >
+                Oder wähle eine Frage:
+              </p>
+              <div className="flex flex-col gap-2 pl-11">
+                {SUGGESTED_QUESTIONS.map((question) => (
+                  <button
+                    key={question}
+                    onClick={() => sendMessage(question)}
+                    disabled={isLoading}
+                    className="text-left px-4 py-2.5 rounded-xl text-sm transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{
+                      border: '1px solid rgba(0,212,255,0.2)',
+                      background: 'rgba(0,212,255,0.04)',
+                      color: '#a0a0b0',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(0,212,255,0.5)';
+                      e.currentTarget.style.background = 'rgba(0,212,255,0.08)';
+                      e.currentTarget.style.color = '#00d4ff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'rgba(0,212,255,0.2)';
+                      e.currentTarget.style.background = 'rgba(0,212,255,0.04)';
+                      e.currentTarget.style.color = '#a0a0b0';
+                    }}
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {isLoading && <TypingIndicator />}
           {error && (
             <div className="text-red-400 text-xs text-center py-2 font-mono">
@@ -183,8 +219,7 @@ export default function ChatWindow({
               disabled={isLoading}
               rows={1}
               className="flex-1 resize-none rounded-xl px-4 py-3 text-white text-sm
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-all duration-200 overflow-y-auto"
+                disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 overflow-y-auto"
               style={{
                 minHeight: '44px',
                 maxHeight: '128px',
@@ -231,7 +266,10 @@ export default function ChatWindow({
               }}
             >
               {isLoading ? (
-                <span className="w-4 h-4 border border-accent-cyan/40 border-t-accent-cyan rounded-full animate-spin" style={{ borderTopColor: '#00d4ff', borderColor: 'rgba(0,212,255,0.3)' }} />
+                <span
+                  className="w-4 h-4 rounded-full border-2 animate-spin"
+                  style={{ borderColor: 'rgba(0,212,255,0.3)', borderTopColor: '#00d4ff' }}
+                />
               ) : (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -245,7 +283,7 @@ export default function ChatWindow({
         </div>
       </div>
 
-      {/* Calendly CTA – erscheint nach der ersten Antwort */}
+      {/* Calendly CTA */}
       <div
         className="mt-4 rounded-xl border px-5 py-4 flex items-center justify-between gap-4 transition-all duration-500"
         style={{
@@ -255,9 +293,7 @@ export default function ChatWindow({
         }}
       >
         <div>
-          <p className="text-white text-sm font-semibold mb-0.5">
-            Lieber persönlich reden?
-          </p>
+          <p className="text-white text-sm font-semibold mb-0.5">Lieber persönlich reden?</p>
           <p className="text-xs" style={{ color: '#a0a0b0' }}>
             Buch dir 60 Minuten mit Wojtek – direkt und unkompliziert.
           </p>

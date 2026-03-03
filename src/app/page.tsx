@@ -1,21 +1,14 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import HeroSection from '@/components/HeroSection';
-import SuggestedQuestions from '@/components/SuggestedQuestions';
 import ChatWindow from '@/components/ChatWindow';
 
 export default function Home() {
   const chatRef = useRef<HTMLDivElement>(null);
-  const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
 
   const scrollToChat = () => {
     chatRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const handleSuggestedQuestion = (question: string) => {
-    setPendingQuestion(question);
-    scrollToChat();
   };
 
   return (
@@ -31,11 +24,6 @@ export default function Home() {
 
       <div className="max-w-4xl mx-auto">
         <HeroSection onCtaClick={scrollToChat} />
-
-        <SuggestedQuestions
-          onSelect={handleSuggestedQuestion}
-          disabled={false}
-        />
 
         {/* Trennlinie */}
         <div className="flex items-center gap-4 px-4 mb-8 max-w-3xl mx-auto">
@@ -55,11 +43,7 @@ export default function Home() {
           />
         </div>
 
-        <ChatWindow
-          pendingQuestion={pendingQuestion}
-          onQuestionConsumed={() => setPendingQuestion(null)}
-          chatRef={chatRef}
-        />
+        <ChatWindow chatRef={chatRef} />
       </div>
 
       {/* Footer */}
