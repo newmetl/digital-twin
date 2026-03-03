@@ -18,7 +18,7 @@ const INITIAL_MESSAGE: Message = {
   id: 'initial',
   role: 'assistant',
   content:
-    'Hallo! Ich bin der digitale Zwilling von Wojtek Gorecki. Stell mir deine Fragen zu KI, Product Ownership oder der Zukunft der Produktentwicklung – ich antworte dir direkt. Was möchtest du wissen?',
+    'Hallo! Ich bin der digitale Zwilling von Wojtek Gorecki. Bevor wir starten – wie heißt du, und für welches Unternehmen bist du unterwegs?',
   timestamp: new Date(),
 };
 
